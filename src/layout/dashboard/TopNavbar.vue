@@ -36,6 +36,16 @@
         <span class="navbar-toggler-bar navbar-kebab"></span>
       </button>
 
+      <!-- Navbar Visited Pages -->
+       <!-- Start -->
+      <div class="collapse navbar-collapse justify-content-center">
+        <div v-for="(item , index) in links" :key="index" class="route-button">
+          <div @click="() => $route.name !== item.name && $router.push({ name: item.name })">{{ item.name }}</div>
+          <img width="16" height="16" src="https://img.icons8.com/material-outlined/24/ffffff/delete-sign.png" alt="delete-sign" @click="removeRoute(item.name)"/>
+        </div>
+      </div>
+      <!-- End -->
+
       <collapse-transition>
         <div class="collapse navbar-collapse show" v-show="showMenu">
           <ul class="navbar-nav" :class="$rtl.isRTL ? 'mr-auto' : 'ml-auto'">
@@ -152,6 +162,8 @@
 <script>
 import { CollapseTransition } from "vue2-transitions";
 import Modal from "@/components/Modal";
+import navbarStore from "./navbarStore";
+import { useRoute } from "vue-router/composables";
 
 export default {
   components: {
@@ -173,6 +185,7 @@ export default {
       showMenu: false,
       searchModalVisible: false,
       searchQuery: "",
+      links : navbarStore.navbarAddedLinks
     };
   },
   methods: {
@@ -194,7 +207,44 @@ export default {
     toggleMenu() {
       this.showMenu = !this.showMenu;
     },
+    addRoute(route) {
+      if (!this.links.some(link => link.name === route.name)) navbarStore.addLink(route);
+    },
+    removeRoute(name) {
+      if (this.links.some(link => link.name === name)){
+        navbarStore.removeLink(name);
+        this.links = this.links.filter(link => link.name !== name)
+      };
+    }
   },
+  mounted() {
+    const route = {
+      name: useRoute().name,
+      path: useRoute().path,
+    }
+    this.addRoute(route);
+  }
 };
 </script>
-<style></style>
+<style lang="scss" scoped>
+.route-button {
+  cursor: pointer;
+  margin-left: 5px;
+  transition: 0.3s;
+  color: white;
+  border: 1px solid white;
+  padding: 5px 5px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  &:hover {
+    transform: scale(1.1);
+  }
+  > img {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+}
+</style>
